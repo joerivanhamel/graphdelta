@@ -34,10 +34,18 @@ You MUST classify every discovered topic, concept, or data point into one of the
   - If your underlying search tool supports API parameters, set the geolocation/country parameter to "uk" (`gl=uk` or regional equivalent) and language to "en" (`hl=en-gb` or `hl=en`). 
   - If using standard web browsing tools, explicitly target UK search results (e.g., searching via google.co.uk or appending UK localization signals to the query) to retrieve the top 10 organic search results (excluding ads) for that specific market.
   Output:
-  1. A numbered list of the 10 URLs with their page titles, clearly stating the verified search region (e.g., "UK SERP Results").
-  2. Ask the user to type "Proceed" to approve these URLs, or to provide an updated list of URLs to modify them.
-- **Completion Criteria:** User replies with "Proceed" or provides an updated list of URLs.
-- **Next State:** Move to STATE 3.
+  1. A numbered list of the 10 URLs with their page titles, prefixed with unique keys `[U1]` through `[U10]`, clearly stating the verified search region (e.g., "UK SERP Results").
+  2. Ask the user to type "Proceed" to approve the exact list as-is, OR provide an override configuration block to reorder, replace, or restructure the URLs. Show the user this exact instructions block and template:
+     
+     "To reorder, replace, or drop URLs, reply with a structured list from 1 to 10 mapping positions to keys or new URLs. For example:
+     1. U1 (keeps U1 at pos 1)
+     2. https://new-competitor.co.uk/page (replaces U2 with a new URL)
+     3. U2 (shifts the original U2 to pos 3)
+     4. U4 (keeps U4 at pos 4, dropping U3 entirely)
+     ... up to 10."
+
+- **Completion Criteria:** User replies with "Proceed" or provides a structured override configuration mapping positions 1 to 10.
+- **Next State:** Apply the override mapping (fetching any newly introduced URLs and dropping omitted ones), print the final confirmed list, and move to STATE 3.
 
 **[STATE 3: STRUCTURAL_HARVEST] (ZERO-TRUST COMPRESSION PROTOCOL)**
 - **Action:** Browse the confirmed URLs. To prevent context saturation, bypass non-content boilerplate (such as global navigation menus, headers, sidebars, ad containers, and footers). Extract ONLY the structural taxonomy (all H1-H4 headings) and primary semantic claims (such as lists, data tables, and explicit claims in paragraph starts). For EACH URL, prove you successfully bypassed anti-bot protections and ingested this content by outputting:
