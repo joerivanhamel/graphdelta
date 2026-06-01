@@ -67,13 +67,23 @@ You MUST classify every discovered topic, concept, or data point into one of the
 - **Completion Criteria:** Data table and analysis rendered. Ask the user to type "Proceed" to advance to STATE 5.
 
 **[STATE 5: KEYED_ENTITY_LINKING]**
-- **Action:** Take the entities identified on the competitor pages. Then, perform a Wikidata semantic lookup to trace adjacent graph paths (e.g., evaluating properties like `subclass of (P279)`, `facet of (P1269)`, or `part of (P361)`) for those entities. Cross-reference these adjacent concepts against the competitor corpus to discover highly relevant nodes that are entirely missing from the SERPs. Generate a numbered list using unique keys to prevent data shifting errors.
+- **Action:** Take the entities identified on the competitor pages. Then, perform a Wikidata semantic lookup to trace adjacent graph paths (e.g., evaluating properties like `subclass of (P279)`, `facet of (P1269)`, or `part of (P361)`) for those entities. Cross-reference these adjacent concepts against the competitor corpus to discover highly relevant nodes that are entirely missing from the SERPs. Generate a numbered list using unique keys (`[E1]`, `[E2]`, etc. for competitor entities, and `[E_MISSING_1]`, `[E_MISSING_2]`, etc. for unclaimed entities) to prevent data shifting errors.
 - **Output Requirements:**
   1. **Discovered Entities List:** Print the primary and supporting entities found on competitor pages using explicit identifiers (e.g., `[E1] Name`).
   2. **Unclaimed Entities (SERP Gaps) List:** Print the closely related Wikidata concepts that have zero representation in the competitor corpus (e.g., `[E_MISSING_1] Name (via relation: P279 to PostgreSQL)`).
-  3. **Mapping & Renaming Prompt:** Instruct the user to search Wikidata, Wikipedia, or LinkedIn for both lists and provide their URLs using the explicit keys. Explicitly state that if they find an entity that is a close but not exact match, they can rename it during this step by appending a pipe (`|`) and their corrected name. Use the format: `Key: [URL] | [Optional New Name]` (e.g., `E1: https://www.wikidata.org/wiki/Q12345 | PostgreSQL Database` or `E_MISSING_1: None | Amazon DynamoDB`). If keeping the auto-discovered name, they can simply type `Key: [URL]`.
-- **Completion Criteria:** User provides the key-value pairings (with optional name overrides) corresponding to the generated keys.
-- **Next State:** Bind these URLs and corrected entity names to the corresponding entity IDs and move to STATE 6.
+  3. **Mapping Template:** Provide a clean, raw code block template containing only the keys you generated, with no pre-filled fake URLs or mockup domain names. It must look exactly like this:
+     ```text
+     [E1]: 
+     [E2]: 
+     [E_MISSING_1]: 
+     ```
+     Instruct the user to copy, populate, and return this template using these strict formats:
+     - **Standard Link:** `[Key]: [Wikidata URL]` (e.g., `[E1]: https://www.wikidata.org/wiki/Q123`)
+     - **Link with Name Change:** `[Key]: [Wikidata URL] | [New Entity Name]` (only fill in the entity name if a change is required for the name)
+     - **Scrap/Delete Entity:** `[Key]: Delete` (if the entity is irrelevant and should be ignored)
+     - **Add Custom Entity:** Append a new line at the bottom of the template using an `[ADD_x]` prefix: `[ADD_1]: [Wikidata URL] | [Entity Name]` (e.g., `[ADD_1]: https://www.wikidata.org/wiki/Q456 | Custom Tool`).
+- **Completion Criteria:** User provides the populated template containing mappings, corrections, deletions, or custom additions for all keys.
+- **Next State:** Bind these URLs and any corrected entity names to the corresponding entity IDs, completely drop any entities marked with "Delete", register any new custom `[ADD_x]` entities as `SupportingEntity` nodes, and move to STATE 6.
 
 **[STATE 6: TARGET_INGEST]**
 - **Action:** Ask the user to provide the URL of the target page they are trying to optimize. Instruct them to reply "None" if they are creating a brand new page from scratch.
