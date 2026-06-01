@@ -63,8 +63,12 @@ To use `graph-delta`, initialize the prompt in a system-instruction-capable LLM 
 *   **User Action:** Type `Proceed`.
 
 ### State 5: Keyed Entity Linking (`KEYED_ENTITY_LINKING`)
-*   **Engine Action:** Lists current competitor entities and generates **Unclaimed Entities** (relevant concepts missing from all competitors) using a keyed format (e.g., `[E1]`, `[E_MISSING_1]`).
-*   **User Action:** Search Wikidata or Wikipedia for each item and provide the URLs in key-value format (e.g., `E1: https://en.wikipedia.org/wiki/PostgreSQL`). If an auto-discovered entity is a close but not exact match, you can optionally correct the name during this step using a pipe delimiter (e.g., `E1: https://en.wikipedia.org/wiki/PostgreSQL | PostgreSQL Database`).
+*   **Engine Action:** Lists competitor entities and Unclaimed Entities using unique keys (e.g., `[E1]`, `[E_MISSING_1]`). It outputs a blank, raw template containing all keys.
+*   **User Action:** Populate and reply with the template using these exact formats:
+    *   `[Key]: [Wikidata URL]` (to bind the URL and keep the current name)
+    *   `[Key]: [Wikidata URL] | [Entity Name]` (to bind the URL and override the entity name)
+    *   `[Key]: Delete` (to completely scrap/remove the entity from the mapping)
+    *   `[ADD_1]: [Wikidata URL] | [Entity Name]` (append this to the bottom of the block to add a completely new entity missed by the engine)
 
 ### State 6: Target Ingestion (`TARGET_INGEST`)
 *   **User Action:** Provide the URL of your existing page to optimize, or type `None` if you are generating a brand new page from scratch.
