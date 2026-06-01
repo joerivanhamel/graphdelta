@@ -49,8 +49,10 @@ To use `graph-delta`, initialize the prompt in a system-instruction-capable LLM 
 *   **Engine Action:** Confirms and saves both inputs sequentially before configuring regional search parameters.
 
 ### State 2: SERP Verification (`SERP_VERIFY`)
-*   **Engine Action:** Retrieves the top 10 organic search results from the localized market verified in State 1 (excluding advertisements) using regional search parameters (such as `gl=uk` and `hl=en` for the UK market).
-*   **User Action:** Review the URL list. Type `Proceed` to confirm, or paste alternative competitor URLs if you wish to adjust the competitive landscape.
+*   **Engine Action:** Retrieves the top 10 organic search results from the localized market verified in State 1 (excluding advertisements) and prefixes them with keys `[U1]` through `[U10]`.
+*   **User Action:** 
+    *   Type `Proceed` to approve the search results as-is.
+    *   **Or** provide a structured override mapping from 1 to 10 using the `[U]` keys to reorder/drop pages, or insert raw URLs to swap in new competitors. (e.g., setting `2. https://new-competitor.com` to replace `U2`, or mapping `3. U2` to shift its position).
 
 ### State 3: Structural Harvesting (`STRUCTURAL_HARVEST`)
 *   **Engine Action:** Pulls competitor pages and filters out global elements (navbars, sidebars, ads). It presents the exact `<title>` tags, `<h1>` headers, and 10-word structural quotes for each URL to prove anti-bot bypass.
