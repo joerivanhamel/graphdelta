@@ -49,10 +49,11 @@ To use `graph-delta`, initialize the prompt in a system-instruction-capable LLM 
 *   **Engine Action:** Confirms and saves both inputs sequentially before configuring regional search parameters.
 
 ### State 2: SERP Verification (`SERP_VERIFY`)
-*   **Engine Action:** Retrieves the top 10 organic search results from the localized market verified in State 1 (excluding advertisements) and prefixes them with keys `[U1]` through `[U10]`.
+*   **Engine Action:** Retrieves the top 10 organic search results from the localized market verified in State 1 (excluding advertisements) and prefixes them with keys `[U1]` through `[U10]`. It displays a critical warning advising that native LLM search integrations have a high risk of query localization failure or indexing hallucinations.
 *   **User Action:** 
     *   Type `Proceed` to approve the search results as-is.
-    *   **Or** provide a structured override mapping from 1 to 10 using the `[U]` keys to reorder/drop pages, or insert raw URLs to swap in new competitors. (e.g., setting `2. https://new-competitor.com` to replace `U2`, or mapping `3. U2` to shift its position).
+    *   **Or** provide a structured override mapping using the `[U]` keys to reorder, drop, or swap in raw URLs. 
+    *   *Dynamic Set Sizing:* You can specify any arbitrary number of positions (e.g., mapping 1 to 7, or expanding the list to 1 to 15). The engine will dynamically resize the target analysis set to match the exact count of entries you provide, discarding any omitted slots or ingesting any additional items.
 
 ### State 3: Structural Harvesting (`STRUCTURAL_HARVEST`)
 *   **Engine Action:** Pulls competitor pages and filters out global elements (navbars, sidebars, ads). It presents the exact `<title>` tags, `<h1>` headers, and 10-word structural quotes for each URL to prove anti-bot bypass.
